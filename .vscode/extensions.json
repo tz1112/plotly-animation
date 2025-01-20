@@ -1,0 +1,7 @@
+// Offers alternative way to configure devcontainer settings for usage in VSCODE
+{
+    "recommendations": [
+      //"ms-python.python",
+      //"ms-python.vscode-pylance"
+    ]
+}

@@ -1,0 +1,23 @@
+{
+    "name": "Python 3",
+    // name of the base image
+    "image": "mcr.microsoft.com/devcontainers/python:1-3.13-bookworm",
+    // name of the default user on the devcontainer
+    "remoteUser": "vscode",
+    // offers various options to customize the devenvironment 
+    "customizations": {
+        "vscode": {
+            "settings": {},
+            "extensions": [
+		// python is kept as an example. Use the VSCode marketplace to determine the extension identifier
+                //"ms-python.python",
+            ]
+        }
+    },
+    // initializeCommand is run on the host machine prior to devcontainer build. Use cases include environment preparation (such as docker network creation)
+    //"initializeCommand" : ["docker", "network", "create", "chromadb-net"],
+    // runArgs specify runtime parameters of the devcontainer (e.g. container name or network affiliation)
+    // "runArgs": ["--name=devcontainer-hdbscan-chromadb", "--network=chromadb-net"],
+    // postCreateCommand is run inside the devcontainer after build. Here, a dedicated script is referenced, to simplify the usage of multiple commands
+    "postCreateCommand": ["bash", "./.devcontainer/postCreateCommand.sh"]
+}
