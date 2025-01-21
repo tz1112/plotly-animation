@@ -3,6 +3,7 @@ import plotly.express as px
 import numpy as np
 import pandas as pd
 
+
 df = px.data.gapminder()
 
 fig = px.scatter(df, x="gdpPercap", y="lifeExp", animation_frame="year", animation_group="country",
@@ -23,7 +24,6 @@ fig2 = px.scatter(
     color="continent"
 )
 st.plotly_chart(fig2)
-
 
 
 
@@ -53,20 +53,114 @@ df = pd.DataFrame(data)
 
 
 # Create Animated 3D Scatter Plot
+import pandas as pd
+import numpy as np
+import plotly.express as px
+
+t = np.linspace(0, 10, 50)
+x, y, z = np.cos(t), np.sin(t), t
+
+df = pd.DataFrame({
+    "time" : z,
+    "x" : x,
+    "y" : y,
+    "z" : z,
+    "label" : "A" 
+})
+
+df.loc[df.tail(25).index, 'label'] = "B"
+
+data = []
+history = []
+
+for index, elem in df.iterrows():  
+    data_point = elem
+    # BEGIN dummy (we need to add dummies, otherwise the tail does not work)
+    data.append({"time" : data_point["time"], "x" : -1, "y" : -1, "z" : -1, "label" : "A" 
+    })
+    data.append({"time" : data_point["time"], "x" : -1, "y" : -1, "z" : -1, "label" : "B" 
+    })
+    data.append({"time" : data_point["time"], "x" : -1, "y" : -1, "z" : -1, "label" : "C" 
+    })
+    # END dummy
+    data.append(data_point)
+    history.append(data_point)
+
+    for elem in history[-9:]:
+        data.append({
+            "time" : data_point["time"],
+            "x" : elem["x"],
+            "y" : elem["y"],
+            "z" : elem["z"],
+            "label" : elem["label"]
+        })
+
+
+df = pd.DataFrame(data[1:])
+# with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
+#     print(df)
+
+
 fig = px.scatter_3d(
     df,
     x="x",
     y="y",
     z="z",
     animation_frame="time",
-    range_x=[0, 10],  # Set x-axis range
-    range_y=[0, 10],  # Set y-axis range
-    range_z=[0, 10],  # Set z-axis range
+    range_x=[-1, 1], 
+    range_y=[-1 , 1],
+    range_z=[0,10], 
     title="Animated 3D Time Series Scatter Plot",
     labels={"x": "X-Coordinate", "y": "Y-Coordinate", "z": "Z-Coordinate"},
-    hover_name='id'
+    color="label",
+    color_discrete_map={
+                "A": "red",
+                "B": "green",
+                "C": "blue"}            
 )
 
 fig.update_traces(marker=dict(size=5))
-
+fig.layout.scene.aspectratio = {'x':1, 'y':1, 'z':1}
+# fig.update_scenes(xaxis_visible=False, yaxis_visible=False,zaxis_visible=False )
+fig.update_layout(scene = dict(xaxis = dict(showgrid = False,showticklabels = False),
+                                   yaxis = dict(showgrid = False,showticklabels = False),
+                                   zaxis = dict(showgrid = False,showticklabels = False)
+             ))
+fig.layout.updatemenus[0].buttons[0].args[1]['frame']['duration'] = 50
+fig.layout.updatemenus[0].buttons[0].args[1]['transition']['duration'] = 50
 st.plotly_chart(fig)
+
+
+
+st.divider()
+
+# 2d 3d selector
+
+import plotly.express as px
+df = px.data.iris()
+
+col1, col2 = st.columns(2)
+
+with col1:
+    x_axis = ["sepal_length", "sepal_width", "petal_length", "petal_width"]
+    y_axis = ["sepal_length", "sepal_width", "petal_length", "petal_width"]
+    z_axis = ["sepal_length", "sepal_width", "petal_length", "petal_width"]
+
+    selection_x = st.segmented_control("X-AXIS", x_axis, selection_mode="single", key="selection_x", label_visibility="collapsed")
+    selection_y = st.segmented_control("Y-AXIS", y_axis, selection_mode="single", key="selection_y", label_visibility="collapsed")
+    selection_z = st.segmented_control("Z-AXIS", z_axis, selection_mode="single", key="selection_z")
+
+with col2:
+    color = ["sepal_length", "sepal_width", "petal_length", "petal_width"]
+    selection_color = st.segmented_control("COLOR", color, selection_mode="single", key="color")
+    marker_size = st.slider("Marker size", 1, 10, 3)
+
+if(selection_x is not None and selection_y is not None and selection_z is None):
+    fig = px.scatter(df, x=selection_x, y=selection_y, color=selection_color)
+    fig.update_traces(marker=dict(size=marker_size))
+    st.plotly_chart(fig)
+else:
+    if (selection_x is not None and selection_y is not None and selection_z and not None):
+        fig = px.scatter_3d(df, x=selection_x, y=selection_y, z=selection_z, color=selection_color)
+        fig.update_traces(marker=dict(size=marker_size))
+        st.plotly_chart(fig)
